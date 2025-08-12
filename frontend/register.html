@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for hidden steps */
+        .hidden-step {
+            display: none;
+        }
+        .account-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .account-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .account-card.selected {
+            border-color: #6366f1; /* indigo-500 */
+            border-width: 2px;
+        }
+    </style>
+</head>
+<body class="bg-indigo-50 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Container -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-5xl mx-auto">
+        
+        <!-- Header with Back/Cancel Button -->
+        <div class="flex justify-between items-center mb-8">
+            <a href="login.html" class="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+                <span id="back-button-text" class="font-semibold">CANCEL</span>
+            </a>
+            <h1 id="page-title" class="text-indigo-800 text-2xl font-extrabold uppercase tracking-wide">REGISTER - SELECT TYPE</h1>
+        </div>
+        
+        <!-- Registration Steps Container -->
+        <div id="registration-steps">
+
+            <!-- Step 1: Select Account Type -->
+            <div id="step-1" class="flex flex-col items-center justify-center space-y-8">
+                <p class="text-gray-600 font-semibold text-lg">SELECT ACCOUNT TYPE</p>
+                <div class="flex flex-row flex-wrap justify-center gap-4 w-full">
+                    
+                    <!-- Student Card -->
+                    <div id="student-card" class="account-card p-4 text-center border-2 border-gray-200 rounded-2xl cursor-pointer w-32">
+                        <img src="https://placehold.co/96x96/6366f1/ffffff?text=Student" alt="Student" class="mx-auto w-24 h-24 object-contain mb-2 rounded-lg">
+                        <p class="font-bold text-sm text-gray-800">STUDENT</p>
+                    </div>
+
+                    <!-- Personnel Card -->
+                    <div id="personnel-card" class="account-card p-4 text-center border-2 border-gray-200 rounded-2xl cursor-pointer w-32">
+                        <img src="https://placehold.co/96x96/4f46e5/ffffff?text=Personnel" alt="Personnel" class="mx-auto w-24 h-24 object-contain mb-2 rounded-lg">
+                        <p class="font-bold text-sm text-gray-800">PERSONNEL</p>
+                    </div>
+
+                    <!-- Clinic Card -->
+                    <div id="clinic-card" class="account-card p-4 text-center border-2 border-gray-200 rounded-2xl cursor-pointer w-32">
+                        <img src="https://placehold.co/96x96/3730a3/ffffff?text=Clinic" alt="Clinic" class="mx-auto w-24 h-24 object-contain mb-2 rounded-lg">
+                        <p class="font-bold text-sm text-gray-800">CLINIC</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Step 2: Create Account (hidden initially) -->
+            <div id="step-2" class="hidden-step">
+                <form id="create-account-form" class="space-y-6">
+                    <p class="text-gray-600 font-semibold text-lg text-center mb-8">CREATE ACCOUNT</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="id-number" class="block text-sm font-medium text-gray-700">ENTER ID NUMBER</label>
+                            <input type="text" id="id-number" name="id-number" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="re-id-number" class="block text-sm font-medium text-gray-700">REENTER YOUR ID NUMBER</label>
+                            <input type="text" id="re-id-number" name="re-id-number" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">ENTER YOUR EMAIL</label>
+                            <input type="email" id="email" name="email" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="re-email" class="block text-sm font-medium text-gray-700">REENTER YOUR EMAIL</label>
+                            <input type="email" id="re-email" name="re-email" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">SET YOUR PASSWORD</label>
+                            <input type="password" id="password" name="password" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="re-password" class="block text-sm font-medium text-gray-700">REENTER YOUR PASSWORD</label>
+                            <input type="password" id="re-password" name="re-password" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" id="step2-next-btn" class="w-28 py-2 px-4 rounded-lg text-white font-bold bg-indigo-600 hover:bg-indigo-700 transition-colors">NEXT</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 3: Fill Up Information (hidden initially) -->
+            <div id="step-3" class="hidden-step">
+                <form id="fill-up-info-form" class="space-y-6">
+                    <p class="text-gray-600 font-semibold text-lg text-center mb-8">FILL UP INFORMATION</p>
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">PERSONAL DATA</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="last-name" class="block text-sm font-medium text-gray-700">LAST NAME</label>
+                            <input type="text" id="last-name" name="last-name" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="first-name" class="block text-sm font-medium text-gray-700">FIRST NAME</label>
+                            <input type="text" id="first-name" name="first-name" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="middle-name" class="block text-sm font-medium text-gray-700">MIDDLE NAME</label>
+                            <input type="text" id="middle-name" name="middle-name" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label for="city-address" class="block text-sm font-medium text-gray-700">CITY ADDRESS</label>
+                            <input type="text" id="city-address" name="city-address" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                    </div>
+                    <!-- Conditional fields for Student -->
+                    <div id="student-fields" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label for="department" class="block text-sm font-medium text-gray-700">DEPARTMENT</label>
+                                <select id="department" name="department" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                    <option value="">Select...</option>
+                                    <option value="Grade School">Grade School</option>
+                                    <option value="Junior High School">Junior High School</option>
+                                    <option value="Senior High School">Senior High School</option>
+                                    <option value="SED">SED</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="level" class="block text-sm font-medium text-gray-700">LEVEL</label>
+                                <select id="level" name="level" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="section-program" class="block text-sm font-medium text-gray-700">SECTION/PROGRAM</label>
+                                <select id="section-program" name="section-program" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                    <option value="">Select...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Conditional fields for Personnel -->
+                    <div id="personnel-fields" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="personnel-type" class="block text-sm font-medium text-gray-700">PERSONNEL TYPE</label>
+                                <select id="personnel-type" name="personnel-type" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                    <option value="">Select...</option>
+                                    <option value="teaching">Teaching</option>
+                                    <option value="non-teaching">Non-Teaching</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="personnel-dept-office" class="block text-sm font-medium text-gray-700">PERSONNEL DEPT. OR OFFICE</label>
+                                <input type="text" id="personnel-dept-office" name="personnel-dept-office" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                            </div>
+                            <!-- New Department field for Teaching personnel -->
+                            <div id="personnel-department-container" class="hidden">
+                                <label for="personnel-department" class="block text-sm font-medium text-gray-700">DEPARTMENT</label>
+                                <select id="personnel-department" name="personnel-department" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                    <option value="">Select...</option>
+                                    <option value="Grade School">Grade School</option>
+                                    <option value="Junior High School">Junior High School</option>
+                                    <option value="Senior High School">Senior High School</option>
+                                    <option value="SED">SED</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="tel-no" class="block text-sm font-medium text-gray-700">TEL. NO.</label>
+                            <input type="tel" id="tel-no" name="tel-no" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="phone-no" class="block text-sm font-medium text-gray-700">PHONE NO.</label>
+                            <input type="tel" id="phone-no" name="phone-no" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="date-of-birth" class="block text-sm font-medium text-gray-700">DATE OF BIRTH</label>
+                            <input type="date" id="date-of-birth" name="date-of-birth" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="sex" class="block text-sm font-medium text-gray-700">SEX</label>
+                            <select id="sex" name="sex" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                                <option value="">Select...</option>
+                                <option value="male">MALE</option>
+                                <option value="female">FEMALE</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="religion" class="block text-sm font-medium text-gray-700">RELIGION</label>
+                            <input type="text" id="religion" name="religion" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="nationality" class="block text-sm font-medium text-gray-700">NATIONALITY</label>
+                            <input type="text" id="nationality" name="nationality" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <label class="block text-sm font-medium text-gray-700">LIVING WITH</label>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="living-parents" name="living-with" value="parents" class="form-checkbox text-indigo-600 rounded">
+                            <label for="living-parents" class="ml-2 text-sm text-gray-700">PARENTS</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="living-grandparents" name="living-with" value="grandparents" class="form-checkbox text-indigo-600 rounded">
+                            <label for="living-grandparents" class="ml-2 text-sm text-gray-700">GRANDPARENTS</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="living-relatives" name="living-with" value="relatives" class="form-checkbox text-indigo-600 rounded">
+                            <label for="living-relatives" class="ml-2 text-sm text-gray-700">RELATIVES</label>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="living-others" name="living-with" value="others" class="form-checkbox text-indigo-600 rounded">
+                            <label for="living-others" class="text-sm text-gray-700">OTHERS:</label>
+                            <input type="text" id="others-input" name="others-input" class="px-2 py-1 border-2 border-indigo-200 rounded-lg w-32" disabled>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="father-name" class="block text-sm font-medium text-gray-700">FATHER</label>
+                            <input type="text" id="father-name" name="father-name" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="father-occupation" class="block text-sm font-medium text-gray-700">OCCUPATION</label>
+                            <input type="text" id="father-occupation" name="father-occupation" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="mother-name" class="block text-sm font-medium text-gray-700">MOTHER</label>
+                            <input type="text" id="mother-name" name="mother-name" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                        <div>
+                            <label for="mother-occupation" class="block text-sm font-medium text-gray-700">OCCUPATION</label>
+                            <input type="text" id="mother-occupation" name="mother-occupation" class="mt-1 block w-full px-4 py-2 border-2 border-indigo-200 rounded-lg">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-8">
+                        <button type="button" id="step3-back-btn" class="w-28 py-2 px-4 rounded-lg text-white font-bold bg-gray-500 hover:bg-gray-600 transition-colors">BACK</button>
+                        <button type="button" id="step3-next-btn" class="w-28 py-2 px-4 rounded-lg text-white font-bold bg-indigo-600 hover:bg-indigo-700 transition-colors">NEXT</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 4: Review Submitted Information (hidden initially) -->
+            <div id="step-4" class="hidden-step p-4">
+                <h2 class="text-lg font-bold text-gray-800 text-center mb-8">REVIEW YOUR SUBMITTED INFORMATION</h2>
+                <div id="review-info" class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 text-gray-700">
+                    <!-- Review information will be dynamically inserted here -->
+                </div>
+                <div class="flex justify-between mt-8">
+                    <button type="button" id="step4-back-btn" class="w-28 py-2 px-4 rounded-lg text-white font-bold bg-gray-500 hover:bg-gray-600 transition-colors">BACK</button>
+                    <button type="button" id="step4-create-btn" class="w-28 py-2 px-4 rounded-lg text-white font-bold bg-indigo-600 hover:bg-indigo-700 transition-colors">CREATE</button>
+                </div>
+            </div>
+
+            <!-- Final Confirmation Message -->
+            <div id="confirmation-message" class="hidden-step text-center">
+                <p class="text-3xl font-bold text-indigo-600 mt-12 mb-4">Registration Successful!</p>
+                <p class="text-gray-600 text-lg">Your account has been created. You can now log in.</p>
+            </div>
+
+        </div>
+
+      </div>
+
+      <script src="scripts/register.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Clinic Daily Census Record</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 500px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+    }
+  </style>
+</head>
+<body>
+  <h2>New Clinic Daily Census Entry</h2>
+
+  <form id="censusForm">
+    <label>First Name
+      <input type="text" id="first_name" required />
+    </label>
+
+    <label>Middle Name
+      <input type="text" id="middle_name" />
+    </label>
+
+    <label>Last Name
+      <input type="text" id="last_name" required />
+    </label>
+
+    <label>ID Number
+      <input type="text" id="id_num" required />
+    </label>
+
+    <label>Age
+      <input type="number" id="age" required />
+    </label>
+
+    <label>Sex
+      <input type="text" id="sex" required />
+    </label>
+
+    <label>Department
+      <input type="text" id="department" />
+    </label>
+
+    <label>Section
+      <input type="text" id="section" />
+    </label>
+
+    <label>Date (MM/DD/YY)
+      <input type="text" id="date" required />
+    </label>
+
+    <label>Purpose of Visit
+      <input type="text" id="purpose_visit" />
+    </label>
+
+    <label>Vital Signs
+      <input type="text" id="vital_signs" />
+    </label>
+
+    <label>Treatment
+      <input type="text" id="treatment" />
+    </label>
+
+    <label>Time In
+      <input type="text" id="time_in" />
+    </label>
+
+    <label>Time Out
+      <input type="text" id="time_out" />
+    </label>
+
+    <button type="submit">Submit Record</button>
+  </form>
+
+  <!-- Firebase logic -->
+  <script type="module">
+    import { db } from "./firebase-init.js";
+    import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+
+    const form = document.getElementById("censusForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const newData = {
+        first_name: form.first_name.value,
+        middle_name: form.middle_name.value,
+        last_name: form.last_name.value,
+        id_num: form.id_num.value,
+        age: Number(form.age.value),
+        sex: form.sex.value,
+        department: form.department.value,
+        section: form.section.value,
+        date: form.date.value,
+        purpose_visit: form.purpose_visit.value,
+        vital_signs: form.vital_signs.value,
+        treatment: form.treatment.value,
+        time_in: form.time_in.value,
+        time_out: form.time_out.value,
+      };
+
+      try {
+        await addDoc(collection(db, "clinic_daily_census"), newData);
+        alert("✅ Record added successfully!");
+        form.reset();
+      } catch (err) {
+        console.error("❌ Error adding document:", err);
+        alert("Error: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+#backend
+backend/serviceAccountKey.json
+backend/firebaseAdmin.js
+backend/firebaseConfig.js
+backend/firebaseTest.js
+backend/test.js
+backend/node_modules/
+node_modules/
+
+frontend/node_modules/
+frontend/scripts/firebase-init.js
+
+.env
