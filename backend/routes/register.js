@@ -1,142 +1,88 @@
-import express from "express";  //api route framework
-import { db, auth } from "../firebaseAdmin.js";
+import express from "express";
+import { db } from "../firebaseAdmin.js";
 
 const router = express.Router();
 
-// changing the birthdate format
-function parseBirthDate(birthDateString) {
-  if (!birthDateString) return { birth_day: 0, birth_month: 0, birth_year: 0 };
-  const date = new Date(birthDateString);
-  if (isNaN(date.getTime())) return { birth_day: 0, birth_month: 0, birth_year: 0 };
-  return {
-    birth_day: date.getUTCDate(),
-    birth_month: date.getUTCMonth() + 1,
-    birth_year: date.getUTCFullYear(),
-  };
-}
-//main
-router.post("/", async (req, res) => {  
+router.get("/", async (req, res) => {
   try {
-    console.log("Received registration data:", req.body);
-
-    const {     //basically variableName (from the server) : the variable from the website
-      accountType,
-      "id-number": idNumber,
-      email,
-      password,
-
-      "first-name": firstName = "",
-      "middle-name": middleName = "",
-      "last-name": lastName = "",
-      "date-of-birth": dateOfBirth = "",
-      sex = "",
-      religion = "",
-      nationality = "",
-      "living-with": livingWith = [],
-      "others-input": othersInput = "",
-
-      allergy = "",
-      asthma = "",
-      diabetes = "",
-      heart_disease = "",
-      hypertension = "",
-      personal_data_id = "",
-
-      "city-address": cityAddress = "",
-      "tel-no": telNo = "",
-      "phone-no": phoneNo = "",
-
-      "father-name": fatherName = "",
-      "father-occupation": fatherOccupation = "",
-      "mother-name": motherName = "",
-      "mother-occupation": motherOccupation = "",
-
-      department = "",
-      level = "",
-      "section-program": sectionProgram = "",
-      id_num = "",
-
-      "personnel-type": personnelType = "",
-      "personnel-dept-office": personnelDeptOffice = "",
-      "personnel-department": personnelDepartment = "",
-    } = req.body;
-
-    // if false, show a message
-    if (!accountType || !idNumber || !email || !password) {
-      return res.status(400).json({ message: "Missing required fields: accountType, id-number, email or password." });
+    const { search } = req.query;
+    if (!search) {
+      return res.status(400).json({ success: false, message: "No ID number provided." });
     }
 
-    // save to firebase auth
-    const userRecord = await auth.createUser({
-      email,
-      password,
-      displayName: `${firstName} ${lastName}`.trim(),
-      disabled: false,
-    });
+    console.log("Searching ID:", search);
 
-    // firebase database 'account'
-    await db.collection("account").doc(userRecord.uid).set({
-      "id-number": idNumber,
-      email,
-      role: accountType,
-      firebase_uid: userRecord.uid,
-      created_uid: new Date(),
-    });
+    // Fetch all documents from the relevant collections
+    const [accountSnapshot, personalDataSnapshot, studentDataSnapshot] = await Promise.all([
+      db.collection("account").where("id_num", "==", search).get(),
+      db.collection("personal_data").where("id_num", "==", search).get(),
+      db.collection("student").where("id_num", "==", search).get()
+    ]);
+    
+    // Get the data from each snapshot, if it exists
+    const accountData = accountSnapshot.empty ? {} : accountSnapshot.docs[0].data();
+    const personalData = personalDataSnapshot.empty ? {} : personalDataSnapshot.docs[0].data();
+    const studentData = studentDataSnapshot.empty ? {} : studentDataSnapshot.docs[0].data();
 
-    // convert birthdate
-    const { birth_day, birth_month, birth_year } = parseBirthDate(dateOfBirth);
-
-    // firebase database 'personal data'
-    await db.collection("personal_data").doc(userRecord.uid).set({
-      allergy,
-      asthma,
-      diabetes,
-      heart_disease,
-      hypertension,
-      birth_day,
-      birth_month,
-      birth_year,
-      city_address: cityAddress,
-      father: fatherName,
-      father_job: fatherOccupation,
-      first_name: firstName,
-      hypertension,
-      id_num: idNumber,
-      landline_num: telNo || "",
-      last_name: lastName,
-      living_with: Array.isArray(livingWith) ? livingWith.join(", ") : livingWith || "",
-      middle_name: middleName,
-      mother: motherName,
-      mother_job: motherOccupation,
-      nationality,
-      personal_data_id,
-      phone_num: phoneNo || "",
-      religion,
-      sex,
-      others_input: othersInput,
-      //createdAt: new Date(),  //comment out since i dont need it
-    });
-
-    // student or personnel
-    if (accountType === "student") {
-      await db.collection("student").doc(userRecord.uid).set({
-        department,
-        id_num: id_num || idNumber,
-        level,
-        sec_or_prog: sectionProgram,
-      });
-    } else if (accountType === "personnel") {
-      await db.collection("personnel").doc(userRecord.uid).set({
-        personnel_type: personnelType,
-        personnel_dept_office: personnelDeptOffice,
-        personnel_department: personnelDepartment, // add if teaching
-      });
+    // Check if any data was found
+    if (Object.keys(accountData).length === 0 && Object.keys(personalData).length === 0 && Object.keys(studentData).length === 0) {
+      console.log("ID not found in any collection");
+      return res.json({ success: false, message: "ID not found." });
     }
 
-    return res.status(201).json({ message: "User registered successfully." });
-  } catch (error) {
-    console.error("Registration error:", error);
-    return res.status(500).json({ message: "Internal server error.", error: error.message });
+    // Combine all the data into a single object, prioritizing 'personalData'
+    const combinedData = {
+      ...accountData,
+      ...studentData,
+      ...personalData,
+    };
+    
+    console.log("Combined Data:", combinedData);
+
+    // Build the personal_data object from combinedData
+    const personal_data = {
+      id_num: combinedData.id_num || "-",
+      last_name: combinedData.last_name || "-",
+      first_name: combinedData.first_name || "-",
+      middle_name: combinedData.middle_name || "-",
+      date_of_birth: `${combinedData.birth_month || "-"} - ${combinedData.birth_day || "-"} - ${combinedData.birth_year || "-"}`,
+      sex: combinedData.sex || "-",
+      landline_num: combinedData.landline_num || "-",
+      phone_num: combinedData.phone_num || "-",
+      email: combinedData.email || "-",
+      city_address: combinedData.city_address || "-",
+      department: combinedData.department || "-",
+      level: combinedData.level || "-",
+      sec_or_prog: combinedData.sec_or_prog || "-",
+      father: combinedData.father || "-",
+      father_job: combinedData.father_job || "-",
+      mother: combinedData.mother || "-",
+      mother_job: combinedData.mother_job || "-",
+      living_with: combinedData.living_with || "-",
+      religion: combinedData.religion || "-",
+      nationality: combinedData.nationality || "-",
+      type: combinedData.type || "-",
+      dept_or_office: combinedData.dept_or_office || "-"
+    };
+
+    // Build the medical_history object from combinedData
+    const medical_history = {
+        allergy: combinedData.allergy || "-",
+        asthma: combinedData.asthma || "-",
+        diabetes: combinedData.diabetes || "-",
+        heart_disease: combinedData.heart_disease || "-",
+        hypertension: combinedData.hypertension || "-",
+    };
+
+    return res.json({
+      success: true,
+      personal_data,
+      medical_history
+    });
+
+  } catch (err) {
+    console.error("Error searching ID:", err);
+    return res.status(500).json({ success: false, message: "Internal server error", error: err.message });
   }
 });
 
