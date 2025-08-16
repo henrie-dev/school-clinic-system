@@ -71,4 +71,24 @@ router.post("/", async (req, res) => {
     }
 });
 
+router.post("/", async (req, res) => {
+    try {
+        const censusData = req.body;
+
+        if (!censusData.id_num || !censusData.date || !censusData.first_name || !censusData.last_name || !censusData.purpose_visit) {
+            return res.status(400).json({ success: false, message: "Missing required fields." });
+        }
+
+        const newCensusDoc = await db.collection("clinic_daily_census").add({
+            ...censusData,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        res.json({ success: true, message: "Daily census logged successfully.", census_id: newCensusDoc.id });
+    } catch (error) {
+        console.error("Error logging daily census:", error);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+});
+
 export default router;
