@@ -1,23 +1,31 @@
+// backend/server.js
+
 import express from 'express';
 import path from 'path';
 import serveIndex from 'serve-index';
 import registerRoute from './routes/register.js';
-import clinicSearchInfoRoute from './routes/clinicSearchInfo.js';
-import clinicEditMedicalHistory from './routes/clinicEditMedicalHistory.js';
-import clinicEditPersonalDataRouter from './routes/clinicEditPersonalData.js';
+import clinicSearchInfoRoute from './routes/clinic/clinicSearchInfo.js';
+import clinicEditMedicalHistory from './routes/clinic/clinicEditMedicalHistory.js';
+import clinicEditPersonalDataRouter from './routes/clinic/clinicEditPersonalData.js';
 import studentRoutes from './routes/students.js';
-import clinicCensusRoutes from './routes/clinicCensusForm.js';
-import clinicMedicalListRouter from "./routes/clinicMedicalList.js";
-import clinicMedicalCreateRouter from "./routes/clinicMedicalAnnualCreate.js"; 
+import clinicCensusRoutes from './routes/clinic/clinicCensusForm.js';
+import clinicMedicalListRouter from "./routes/clinic/clinicMedicalList.js";
+import clinicMedicalAnnualRouter from './routes/clinic/clinicMedicalAnnual.js';
+import clinicMedicalAnnualCreateRouter from './routes/clinic/clinicMedicalAnnualCreate.js';
+import clinicMedicalConsultCreateRouter from './routes/clinic/clinicMedicalConsultCreate.js';
+import clinicMedicalConsultRouter from './routes/clinic/clinicMedicalConsult.js';
+import clinicDentalListRouter from './routes/clinic/clinicDentalList.js';
+import clinicDentalTreatCreateRouter from './routes/clinic/clinicDentalTreatCreate.js';
+import clinicDentalTreatRouter from './routes/clinic/clinicDentalTreat.js';        
+import clinicCensusRecordRouter from './routes/clinic1/clinicCensusRecord.js';
+import clinicRouter from './routes/clinic1/clinicSchedule.js';
 
 const app = express();
 const PORT = 3000;
 const __dirname = path.resolve();
 
-// Middleware to parse JSON
 app.use(express.json());
 
-// CORS middleware
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -31,19 +39,35 @@ app.use((req, res, next) => {
 // API Routes
 app.use('/api/register', registerRoute);
 app.use('/api/clinicSearchInfo', clinicSearchInfoRoute);
-app.use('/api/clinicEditMedicalHistory', clinicEditMedicalHistory); 
+app.use('/api/clinicEditMedicalHistory', clinicEditMedicalHistory);
 app.use('/api/clinicEditPersonalData', clinicEditPersonalDataRouter);
-
-// Correctly add the studentRoutes.
 app.use('/api/students', studentRoutes);
-
-// Correctly add the clinicCensusRoutes.
 app.use('/api/clinicCensus', clinicCensusRoutes);
 
-// Corrected: This single line now handles all sub-routes for medical records.
-// This is the key fix to resolve the 405 error.
+// Corrected Medical Records Routing to avoid conflicts
+// clinicMedicalListRouter handles fetching lists of records
 app.use("/api/medical_records", clinicMedicalListRouter);
-app.use("/api/medical_records", clinicMedicalCreateRouter);
+
+// clinicMedicalAnnualCreateRouter handles the creation of annual records
+app.use('/api/medical_records/annual', clinicMedicalAnnualCreateRouter);
+
+// clinicMedicalAnnualRouter handles viewing/deleting a single annual record
+app.use("/api/medical_records/annual", clinicMedicalAnnualRouter);
+
+// clinicMedicalConsultCreateRouter handles the creation of consultation records
+app.use("/api/medical_records/consult", clinicMedicalConsultCreateRouter);
+
+// clinicMedicalConsultRouter handles viewing/deleting a single consultation record
+app.use("/api/medical_records/consult", clinicMedicalConsultRouter);
+
+// Original dental routes - these look fine
+app.use("/api/dental_records", clinicDentalListRouter);
+app.use("/api/dental_records", clinicDentalTreatCreateRouter);
+app.use("/api/dental_records", clinicDentalTreatRouter);
+
+// Correctly use the census record router only once
+app.use('/api/clinicCensusRecord', clinicCensusRecordRouter);
+app.use('/api/clinic', clinicRouter);   //clinicSchedule
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -55,7 +79,6 @@ app.get('/api/health', (req, res) => {
 app.get("/api/test-route", (req, res) => {
     res.json({ success: true, message: "Test route is working!" });
 });
-
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
