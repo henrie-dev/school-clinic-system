@@ -18,7 +18,7 @@ import clinicDentalListRouter from './routes/clinic/clinicDentalList.js';
 import clinicDentalTreatCreateRouter from './routes/clinic/clinicDentalTreatCreate.js';
 import clinicDentalTreatRouter from './routes/clinic/clinicDentalTreat.js';        
 import clinicCensusRecordRouter from './routes/clinic1/clinicCensusRecord.js';
-import clinicRouter from './routes/clinic1/clinicSchedule.js';
+
 
 const app = express();
 const PORT = 3000;
