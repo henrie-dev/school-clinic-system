@@ -1,9 +1,10 @@
 // backend/server.js
-
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import serveIndex from 'serve-index';
 import registerRoute from './routes/register.js';
+import loginRoute from './routes/login.js';
 import clinicSearchInfoRoute from './routes/clinic/clinicSearchInfo.js';
 import clinicEditMedicalHistory from './routes/clinic/clinicEditMedicalHistory.js';
 import clinicEditPersonalDataRouter from './routes/clinic/clinicEditPersonalData.js';
@@ -18,6 +19,12 @@ import clinicDentalListRouter from './routes/clinic/clinicDentalList.js';
 import clinicDentalTreatCreateRouter from './routes/clinic/clinicDentalTreatCreate.js';
 import clinicDentalTreatRouter from './routes/clinic/clinicDentalTreat.js';        
 import clinicCensusRecordRouter from './routes/clinic1/clinicCensusRecord.js';
+import clinicRouter from './routes/clinic1/clinicSchedule.js';
+import patientInfoRoutes from './routes/patient/patientInfo.js';        //patient
+import patientInfoEditRoutes from './routes/patient/patientInfoEdit.js';
+import patientMedicalRoutes from './routes/patient/patientMedical.js';
+import patientDentalRoutes from './routes/patient/patientDental.js';
+import clinicSettingsRoutes from './routes/clinic1/clinicSettings.js';  //clinic change pass
 
 
 const app = express();
@@ -38,6 +45,7 @@ app.use((req, res, next) => {
 
 // API Routes
 app.use('/api/register', registerRoute);
+app.use('/api/login', loginRoute);
 app.use('/api/clinicSearchInfo', clinicSearchInfoRoute);
 app.use('/api/clinicEditMedicalHistory', clinicEditMedicalHistory);
 app.use('/api/clinicEditPersonalData', clinicEditPersonalDataRouter);
@@ -68,6 +76,12 @@ app.use("/api/dental_records", clinicDentalTreatRouter);
 // Correctly use the census record router only once
 app.use('/api/clinicCensusRecord', clinicCensusRecordRouter);
 app.use('/api/clinic', clinicRouter);   //clinicSchedule
+app.use('/api/patient-info', patientInfoRoutes);        //patient
+app.use('/api/patient-info-edit', patientInfoEditRoutes);
+app.use('/api/patient-medical', patientMedicalRoutes);
+app.use('/api/patient-dental', patientDentalRoutes);
+app.use('/api/clinic1/settings', clinicSettingsRoutes);
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
