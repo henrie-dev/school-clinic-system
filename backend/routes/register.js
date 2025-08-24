@@ -1,89 +1,89 @@
-import express from "express";
-import { db } from "../firebaseAdmin.js";
+// backend/routes/register.js
+import express from 'express';
+import { db, auth } from '../firebaseAdmin.js';
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  try {
-    const { search } = req.query;
-    if (!search) {
-      return res.status(400).json({ success: false, message: "No ID number provided." });
+// This helper function now correctly handles empty strings and specific uppercase fields
+const prepareDataForFirestore = (dataObject, fieldsToUppercase = []) => {
+    const newObj = {};
+    for (const key in dataObject) {
+        // Ensure the key belongs to the object
+        if (Object.prototype.hasOwnProperty.call(dataObject, key)) {
+            const value = dataObject[key];
+            if (fieldsToUppercase.includes(key) && typeof value === 'string') {
+                newObj[key] = value.toUpperCase();
+            } else {
+                // Save the original value, or an empty string if it's null/undefined
+                newObj[key] = value || '';
+            }
+        }
+    }
+    return newObj;
+};
+
+router.post('/create', async (req, res) => {
+    const { accountData, personalData, studentData, personnelData, clinicData } = req.body;
+
+    if (!accountData || !accountData.email || !accountData.password || !accountData.role) {
+        return res.status(400).json({ success: false, message: 'Missing required account data.' });
     }
 
-    console.log("Searching ID:", search);
+    try {
+        const userRecord = await auth.createUser({
+            email: accountData.email.toLowerCase(), // Always use lowercase for Auth
+            password: accountData.password,
+            emailVerified: false,
+            disabled: false,
+        });
 
-    // Fetch all documents from the relevant collections
-    const [accountSnapshot, personalDataSnapshot, studentDataSnapshot] = await Promise.all([
-      db.collection("account").where("id_num", "==", search).get(),
-      db.collection("personal_data").where("id_num", "==", search).get(),
-      db.collection("student").where("id_num", "==", search).get()
-    ]);
-    
-    // Get the data from each snapshot, if it exists
-    const accountData = accountSnapshot.empty ? {} : accountSnapshot.docs[0].data();
-    const personalData = personalDataSnapshot.empty ? {} : personalDataSnapshot.docs[0].data();
-    const studentData = studentDataSnapshot.empty ? {} : studentDataSnapshot.docs[0].data();
+        const batch = db.batch();
+        const id_num = accountData.id_num.toUpperCase();
 
-    // Check if any data was found
-    if (Object.keys(accountData).length === 0 && Object.keys(personalData).length === 0 && Object.keys(studentData).length === 0) {
-      console.log("ID not found in any collection");
-      return res.json({ success: false, message: "ID not found." });
+        // --- Account Collection ---
+        const { password, ...accountDataForDb } = accountData;
+        const accountRef = db.collection('account').doc();
+        batch.set(accountRef, {
+            ...prepareDataForFirestore(accountDataForDb, ['role']),
+            id_num: id_num, // Ensure ID is uppercase
+            email: accountData.email.toLowerCase(), // Ensure email is lowercase
+            firebase_uid: userRecord.uid,
+            // REMOVED: The created_uid field has been removed
+        });
+
+        // --- Role-Specific Collections ---
+        const personalFieldsToUpper = ['last_name', 'first_name', 'middle_name', 'city_address', 'father', 'father_job', 'mother', 'mother_job', 'nationality', 'religion', 'sex', 'living_with', 'others_input'];
+
+        if (accountData.role === 'student' && personalData && studentData) {
+            const personalRef = db.collection('personal_data').doc();
+            batch.set(personalRef, { ...prepareDataForFirestore(personalData, personalFieldsToUpper), id_num });
+
+            const studentRef = db.collection('student').doc();
+            batch.set(studentRef, { ...prepareDataForFirestore(studentData, ['department', 'level', 'sec_or_prog', 'section_sed']), id_num });
+
+        } else if (accountData.role === 'personnel' && personalData && personnelData) {
+            const personalRef = db.collection('personal_data').doc();
+            batch.set(personalRef, { ...prepareDataForFirestore(personalData, personalFieldsToUpper), id_num });
+            
+            const personnelRef = db.collection('personnel').doc();
+            batch.set(personnelRef, { ...prepareDataForFirestore(personnelData, ['type', 'dep_or_office']), id_num });
+
+        } else if (accountData.role === 'clinic' && clinicData) {
+            const clinicRef = db.collection('clinic').doc();
+            batch.set(clinicRef, { ...prepareDataForFirestore(clinicData, ['last_name', 'first_name', 'middle_name', 'position', 'sex']), id_num, verify: false });
+        
+        } else if (accountData.role === 'admin') {
+            const adminRef = db.collection('admin').doc();
+            batch.set(adminRef, { id_num });
+        }
+
+        await batch.commit();
+        res.status(201).json({ success: true, message: 'Account created successfully!', uid: userRecord.uid });
+
+    } catch (error) {
+        console.error("Error creating account:", error);
+        res.status(500).json({ success: false, message: 'Failed to create account.', error: error.message });
     }
-
-    // Combine all the data into a single object, prioritizing 'personalData'
-    const combinedData = {
-      ...accountData,
-      ...studentData,
-      ...personalData,
-    };
-    
-    console.log("Combined Data:", combinedData);
-
-    // Build the personal_data object from combinedData
-    const personal_data = {
-      id_num: combinedData.id_num || "-",
-      last_name: combinedData.last_name || "-",
-      first_name: combinedData.first_name || "-",
-      middle_name: combinedData.middle_name || "-",
-      date_of_birth: `${combinedData.birth_month || "-"} - ${combinedData.birth_day || "-"} - ${combinedData.birth_year || "-"}`,
-      sex: combinedData.sex || "-",
-      landline_num: combinedData.landline_num || "-",
-      phone_num: combinedData.phone_num || "-",
-      email: combinedData.email || "-",
-      city_address: combinedData.city_address || "-",
-      department: combinedData.department || "-",
-      level: combinedData.level || "-",
-      sec_or_prog: combinedData.sec_or_prog || "-",
-      father: combinedData.father || "-",
-      father_job: combinedData.father_job || "-",
-      mother: combinedData.mother || "-",
-      mother_job: combinedData.mother_job || "-",
-      living_with: combinedData.living_with || "-",
-      religion: combinedData.religion || "-",
-      nationality: combinedData.nationality || "-",
-      type: combinedData.type || "-",
-      dept_or_office: combinedData.dept_or_office || "-"
-    };
-
-    // Build the medical_history object from combinedData
-    const medical_history = {
-        allergy: combinedData.allergy || "-",
-        asthma: combinedData.asthma || "-",
-        diabetes: combinedData.diabetes || "-",
-        heart_disease: combinedData.heart_disease || "-",
-        hypertension: combinedData.hypertension || "-",
-    };
-
-    return res.json({
-      success: true,
-      personal_data,
-      medical_history
-    });
-
-  } catch (err) {
-    console.error("Error searching ID:", err);
-    return res.status(500).json({ success: false, message: "Internal server error", error: err.message });
-  }
 });
 
 export default router;
