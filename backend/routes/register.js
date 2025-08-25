@@ -82,7 +82,7 @@ router.post('/create', async (req, res) => {
 
     } catch (error) {
         console.error("Error creating account:", error);
-        res.status(500).json({ success: false, message: 'Failed to create account.', error: error.message });
+        res.status(500).json({ success: false, message: 'Failed to create account', error: error.message });
     }
 });
 
